@@ -1,1 +1,1 @@
-# Intelig-ncia-Artificial-2024.1
+# Inteligencia-Artificial-2024.1
