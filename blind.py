@@ -57,4 +57,4 @@ l.addEdges(j)  # Ciclo J-K-L-J
 # Criando o grafo
 graph = Graph(a, b, c, d, e, f, g, h, i, j, k, l)
 
-print(blindSearch(graph, 25))
+printFinalPath(blindSearch(graph, 25))

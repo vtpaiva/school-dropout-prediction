@@ -9,15 +9,15 @@ class Graph:
         self.nodes, self.touristicPoints = args, [i for i in args if i.isTouristic]
     
 # Classe nó com nome, coordenadas e variáveis para o algoritmo A*
-class node:
-    def __init__(self, nodeName, xCoord, yCoord, timeSpent = 0, isTouristic =  False, previousNode = None) -> None:
+class Node:
+    def __init__(self, nodeName, xCoord, yCoord, timeSpent = 0, isTouristic =  False, edgeList = None, pastNodes = None) -> None:
         self.nodeName = nodeName
         self.xCoord, self.yCoord = xCoord, yCoord
         self.timeSpent = timeSpent
         self.isTouristic = isTouristic
         self.isVisited = False
-        self.previousNode = previousNode
-        self.edgeList = {}
+        self.pastNodes = pastNodes if pastNodes != None else []
+        self.edgeList = edgeList if edgeList != None else {}
         self.realPath = {}
         
     def __repr__(self) -> str:
@@ -39,16 +39,6 @@ class node:
 #   Heurística de distância euclidiana
 def euclideanHeuristic(originNode, destinyNode):
     return originNode.getEuclideanDistance(destinyNode)   
-   
-#Algoriitmo do A*
-def backtrackPath(finalNode):
-    path = []
-    
-    while finalNode:
-        path.append(finalNode)
-        finalNode = finalNode.previousNode
-        
-    return path[::-1]
 
 #Algoriitmo do A*
 def shortestPath(graph, heuristic, originNode, destinyNode):
@@ -57,7 +47,7 @@ def shortestPath(graph, heuristic, originNode, destinyNode):
     
     openNodes, closedNodes = [], set()
 
-    currentNode = (node(originNode.nodeName, originNode.xCoord, originNode.yCoord), 0, heuristic(originNode, destinyNode))
+    currentNode = (Node(originNode.nodeName, originNode.xCoord, originNode.yCoord), 0, heuristic(originNode, destinyNode))
     
     openNodes.append(currentNode)
     
@@ -65,11 +55,11 @@ def shortestPath(graph, heuristic, originNode, destinyNode):
         closedNodes.add(currentNode[0].nodeName)
         
         if currentNode[0].nodeName == destinyNode.nodeName:
-            return backtrackPath(currentNode[0]), currentNode[1]
+            return currentNode[0].pastNodes + [currentNode[0]], currentNode[1]
         
         currentNeighbors = graph.edges[currentNode[0].nodeName]
         
-        openNodes.extend([(node(i.nodeName, i.xCoord, i.yCoord, previousNode = currentNode[0], timeSpent = j + currentNode[0].timeSpent), 
+        openNodes.extend([(Node(i.nodeName, i.xCoord, i.yCoord, pastNodes = currentNode[0].pastNodes + [currentNode[0]], timeSpent = j + currentNode[0].timeSpent), 
         j + currentNode[0].timeSpent, heuristic(i, destinyNode)) for i, j in currentNeighbors.items() if i.nodeName not in closedNodes])
         
         tmpNode = min(openNodes, key = lambda x:(x[1] + x[2]))
@@ -87,7 +77,7 @@ def reduceGraph(originalGraph):
     
     for i in touristicPointsCopy:
         shortestPathList = {node : shortPath for node in touristicPointsCopy if i != node and 
-                            (shortPath := shortestPath(graph, euclideanHeuristic, i, node))[1] != np.inf}
+                            (shortPath := shortestPath(originalGraph, euclideanHeuristic, i, node))[1] != np.inf}
         
         i.edgeList = {a:  b[1] for a, b in shortestPathList.items()}
         i.realPath = {a : b[0][1:] for a, b in shortestPathList.items()}
@@ -116,7 +106,10 @@ def maxPointsPath(reducedGraph, timeLimit):
         
         pointsVisited += 1
         
-    return finalPath + [startPoint.nodeName], timeSpent + currentNode.getGraphDistance(startPoint), pointsVisited
+    return finalPath + [i.nodeName for i  in currentNode.realPath.get(startPoint)], pointsVisited, timeSpent + currentNode.getGraphDistance(startPoint)
+
+def printFinalPath(bestPath):
+    print(" -> ".join(bestPath[0]), f"| Pontos visistados: {bestPath[1]} | Custo: {bestPath[2]}")
 
 def plotGraphPoints(graph):
     for point in graph.nodes:
@@ -130,41 +123,47 @@ def plotGraphPoints(graph):
             plt.plot(point.xCoord, point.yCoord, 'r*' if point.isTouristic else 'ko')
             
     plt.show()
-        
-a, b, c, d = node("A", 1, 1, isTouristic=True), node("B", 2, 2), node("C", 3, 3), node("D", 4, 4, isTouristic=True)
-e, f, g, h = node("E", 5, 5), node("F", 6, 6), node("G", 7, 7, isTouristic=True), node("H", 8, 8)
-i, j, k, l = node("I", 9, 9), node("J", 10, 10, isTouristic=True), node("K", 50, 1), node("L", 12, 12, isTouristic=True)
-m, n, o, p = node("M", 54, 9), node("N", 110, 10, isTouristic=True), node("O", 50, 11), node("P", 120, 12, isTouristic=True)
-q, r, s, t = node("Q", 41, 9), node("R", 41, 25, isTouristic=True), node("S", 50, 11), node("T", 144, 12, isTouristic=True)
-start = node("U", 100, 5)
 
-start.addEdges(a, b)
-a.addEdges((start, 79), e, h, k)
-b.addEdges((a, 4), c, d)
-c.addEdges(a, b, d)
-d.addEdges(a, (b, 78), c, e)
-e.addEdges((f, 16))
-f.addEdges(e, g)
-g.addEdges(e, f, h)
-h.addEdges(e, g, i)
-i.addEdges(j, (k, 44), l)
-j.addEdges(k, l, (t, 44))
-k.addEdges((j, 108), l)
-l.addEdges(i, (j, 99), k, m)
-m.addEdges(n, (o, 14), (p, 7))
-n.addEdges((o, 55), p)
-o.addEdges(p)
-p.addEdges((q, 89))
-q.addEdges(a, (r, 2))
-r.addEdges((b, 666), (t, 45), start)
-s.addEdges((t, 42))
-t.addEdges(j)
+if __name__ == "__main__":        
+    a = Node("A", 1, 1)
+    b = Node("B", 2, 2)
+    c = Node("C", 3, 3, isTouristic=True)
+    d = Node("D", 4, 4)
+    e = Node("E", 5, 5, isTouristic=True)
+    f = Node("F", 6, 6)
+    g = Node("G", 7, 7)
+    h = Node("H", 8, 8, isTouristic=True)
+    i = Node("I", 9, 9)
+    j = Node("J", 10, 10, isTouristic=True)
+    k = Node("K", 11, 11)
+    l = Node("L", 12, 12, isTouristic=True)
 
-graph = Graph(start, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t)
-reduced_graph = reduceGraph(graph)
+    # Adicionando conexões (incluindo pesos arbitrários para exemplificar)
+    a.addEdges(b)
+    b.addEdges(c)
+    c.addEdges(a)  # Ciclo A-B-C-A
 
-result = maxPointsPath(reduced_graph, 180)
+    a.addEdges(d)
+    d.addEdges(e)
+    e.addEdges(a)  # Ciclo A-D-E-A
 
-print(" -> ".join(result[0]) , f"| Custo: {result[1]} | Pontos visitados: {result[2]} | Porcentagem: {result[2]/len(graph.touristicPoints)*100:.02f}")
+    a.addEdges(f)
+    f.addEdges(g)
+    g.addEdges(h)
+    h.addEdges(a)  # Ciclo A-F-G-H-A
 
-#plotGraphPoints(graph)
+    h.addEdges(i)
+    i.addEdges(j)
+    j.addEdges(h)  # Ciclo H-I-J-H
+
+    j.addEdges(k)
+    k.addEdges(l)
+    l.addEdges(j)  # Ciclo J-K-L-J
+
+    # Criando o grafo
+    graph = Graph(a, b, c, d, e, f, g, h, i, j, k, l)
+    reduced_graph = reduceGraph(graph)
+
+    result = maxPointsPath(reduced_graph, 180)
+    
+    printFinalPath(result)
