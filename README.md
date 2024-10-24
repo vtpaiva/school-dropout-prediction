@@ -30,13 +30,13 @@ $$\\frac{Students/Class_{ES} \\cdot Classes_{ES} \\cdot Dropout_{ES} + Students/
 
 Thus, the total dropout rates for each educational institution are categorized as follows:
 
-\[
+$$
 \begin{cases} 
 \text{Low} & \text{if } Dropout < 5 \\
 \text{Moderate} & \text{if } 5 \leq Dropout \leq 10 \\
 \text{High} & \text{if } Dropout > 10 
 \end{cases}
-\]
+$$
 
 ## Exploratory Data Analysis
 
