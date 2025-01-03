@@ -1,6 +1,6 @@
 # school-dropout-prediction
 
-# Introduction
+## Introduction
 
 School dropout is a significant problem that affects education and the socioeconomic development of Brazil. Therefore, understanding the factors that influence school dropout is crucial to developing effective policies that can reduce its rates and improve the quality of education. Using the 2021 school census databases provided by **INEP** (National Institute for Educational Studies and Research Anísio Teixeira) and GDP data from municipalities provided by **IBGE** (Brazilian Institute of Geography and Statistics), the goal is to address the problem of school dropout through artificial intelligence techniques.
 
@@ -10,11 +10,11 @@ By using these techniques, this study intends to provide a comprehensive view of
 
 ![Brazilian states's dropout percentages](https://i.imgur.com/vH78NBd.png)
 
-# Conclusion
+## Conclusion
 
 The study concludes that school dropout is a multi-causal problem requiring holistic approaches to address it effectively. Balanced samples proved more effective for model training, and neural networks offered better generalization compared to Random Forest.
 
-# References
+## References
 
 💡 <a href="https://scikit-learn.org/stable/user_guide.html">Scikit-learn documentation</a>
 
